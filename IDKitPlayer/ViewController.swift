@@ -13,6 +13,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        let view = FootToolbarView.init(frame: CGRect.init(x: 0, y: 100, width: self.view.bounds.width, height: 40))
+        view.backgroundColor = UIColor.black
+        self.view.addSubview(view)
     }
 
 

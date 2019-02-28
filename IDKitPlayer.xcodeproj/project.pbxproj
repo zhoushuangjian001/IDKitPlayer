@@ -12,6 +12,10 @@
 		048188AC2227D7F900DB3E78 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 048188AA2227D7F900DB3E78 /* Main.storyboard */; };
 		048188AE2227D7FB00DB3E78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 048188AD2227D7FB00DB3E78 /* Assets.xcassets */; };
 		048188B12227D7FB00DB3E78 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 048188AF2227D7FB00DB3E78 /* LaunchScreen.storyboard */; };
+		048188BA2227D9CC00DB3E78 /* IDKitPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048188B92227D9CC00DB3E78 /* IDKitPlayerView.swift */; };
+		048188BC2227DB0400DB3E78 /* HeadToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048188BB2227DB0400DB3E78 /* HeadToolbarView.swift */; };
+		048188BE2227DB1700DB3E78 /* FootToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048188BD2227DB1700DB3E78 /* FootToolbarView.swift */; };
+		048188C02227DB3400DB3E78 /* TrackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048188BF2227DB3400DB3E78 /* TrackView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +26,10 @@
 		048188AD2227D7FB00DB3E78 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		048188B02227D7FB00DB3E78 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		048188B22227D7FB00DB3E78 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		048188B92227D9CC00DB3E78 /* IDKitPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDKitPlayerView.swift; sourceTree = "<group>"; };
+		048188BB2227DB0400DB3E78 /* HeadToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadToolbarView.swift; sourceTree = "<group>"; };
+		048188BD2227DB1700DB3E78 /* FootToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FootToolbarView.swift; sourceTree = "<group>"; };
+		048188BF2227DB3400DB3E78 /* TrackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,10 +64,22 @@
 			children = (
 				048188A62227D7F900DB3E78 /* AppDelegate.swift */,
 				048188A82227D7F900DB3E78 /* ViewController.swift */,
+				048188B82227D98100DB3E78 /* IDKitPlayer */,
 				048188AA2227D7F900DB3E78 /* Main.storyboard */,
 				048188AD2227D7FB00DB3E78 /* Assets.xcassets */,
 				048188AF2227D7FB00DB3E78 /* LaunchScreen.storyboard */,
 				048188B22227D7FB00DB3E78 /* Info.plist */,
+			);
+			path = IDKitPlayer;
+			sourceTree = "<group>";
+		};
+		048188B82227D98100DB3E78 /* IDKitPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				048188B92227D9CC00DB3E78 /* IDKitPlayerView.swift */,
+				048188BB2227DB0400DB3E78 /* HeadToolbarView.swift */,
+				048188BD2227DB1700DB3E78 /* FootToolbarView.swift */,
+				048188BF2227DB3400DB3E78 /* TrackView.swift */,
 			);
 			path = IDKitPlayer;
 			sourceTree = "<group>";
@@ -135,8 +155,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				048188BC2227DB0400DB3E78 /* HeadToolbarView.swift in Sources */,
 				048188A92227D7F900DB3E78 /* ViewController.swift in Sources */,
+				048188BA2227D9CC00DB3E78 /* IDKitPlayerView.swift in Sources */,
 				048188A72227D7F900DB3E78 /* AppDelegate.swift in Sources */,
+				048188C02227DB3400DB3E78 /* TrackView.swift in Sources */,
+				048188BE2227DB1700DB3E78 /* FootToolbarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
