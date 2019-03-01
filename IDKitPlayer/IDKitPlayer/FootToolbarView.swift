@@ -8,9 +8,26 @@
 
 import UIKit
 
+
+// MARK: - 底部工具栏协议
+@objc protocol FootToolbarViewDelegate {
+    
+    
+    /// 全屏按钮触发代理方法
+    ///
+    /// - Parameter btn: 按钮对象
+    func fullScreenMethod(_ btn: UIButton)
+    
+    func slidValueChangeMethod(_ value: Float)
+    
+}
+
 class FootToolbarView: UIView {
 
-    // 当前播放时间
+    /// 底部代理对象
+    weak var delegate:FootToolbarViewDelegate?
+
+    /// 当前播放时间
     var currentTime : String {
         get{
             return self.currentTimeLable.text!
@@ -20,7 +37,7 @@ class FootToolbarView: UIView {
         }
     }
     
-    // 当前播放时间显示载体
+    /// 当前播放时间显示载体
     fileprivate lazy var currentTimeLable : UILabel = {
         let lable = UILabel.init()
         lable.text = "00:00"
@@ -30,7 +47,7 @@ class FootToolbarView: UIView {
         return lable
     }()
     
-    // 视频总的播放时间
+    /// 视频总的播放时间
     var totalTime : String {
         get{
             return self.totalTimeLable.text!
@@ -40,7 +57,7 @@ class FootToolbarView: UIView {
         }
     }
     
-    // 视频总的播放时间显示载体
+    /// 视频总的播放时间显示载体
     fileprivate lazy var totalTimeLable : UILabel = {
         let lable = UILabel.init()
         lable.text = "00:00"
@@ -50,14 +67,15 @@ class FootToolbarView: UIView {
         return lable
     }()
     
-    // 视频全屏按钮
+    /// 视频全屏按钮
     fileprivate lazy var fullScreenButton : UIButton = {
         let button = UIButton.init(type: .custom)
-        // TODO: 图像设置
+        button.setImage(UIImage.initBundle(name: "fsbtn"), for: .normal)
+        button.addTarget(self, action: #selector(fullScreenAction(_ :)), for: .touchUpInside)
         return button
     }()
 
-    // 视频轨道载体
+    /// 视频轨道载体
     fileprivate lazy var trackView : TrackView = {
         let view = TrackView.init()
         view.backgroundColor = UIColor.clear
@@ -69,8 +87,8 @@ class FootToolbarView: UIView {
     /// - Parameter frame: 初始化视图大小
     override init(frame: CGRect) {
         super.init(frame: frame)
+        self.layerImage(name: "f_toolbar")
         self.addSubclassElement()
-        
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -92,7 +110,15 @@ extension FootToolbarView {
         self.addSubview(self.trackView)
         self.addSubview(self.totalTimeLable)
         self.addSubview(self.fullScreenButton)
+        
+        // 滑动轨道触发事件回调
+        weak var weakself = self
+        self.trackView.sliderValueBlock = { value in
+            guard weakself!.delegate != nil else { return }
+            weakself!.delegate!.slidValueChangeMethod(value)
+        }
     }
+    
     
     /// 子类视图布局
     override func layoutSubviews() {
@@ -117,14 +143,57 @@ extension FootToolbarView {
         origin_x = interval + self.trackView.frame.maxX
         self.totalTimeLable.frame = CGRect.init(x: origin_x, y: origin_y, width: lableWidth, height: subElementHeight)
         
-        // 全品按钮
+        // 全屏按钮
         origin_x = interval + self.totalTimeLable.frame.maxX
         self.fullScreenButton.frame = CGRect.init(x: origin_x, y: ( height - 40 ) * 0.5, width: 40, height: 40)
     }
+    
+    /// 全屏按钮触发方法
+    ///
+    /// - Parameter btn: 按钮对象
+    @objc func fullScreenAction(_ btn:UIButton) {
+        guard self.delegate != nil else { return }
+        self.delegate!.fullScreenMethod(btn)
+    }
+    
+    
+    
+    
 }
 
 
 // MARK: - 对外开放的方法
 extension FootToolbarView {
     
+    /// 底部按钮重置方法
+    func reset(){
+        self.currentTime = ""
+        self.totalTime = ""
+        self.trackView.reset()
+    }
+    
+    
+    /// 设置当前播放时间
+    ///
+    /// - Parameter value: 时间值
+    func setCurrentTime(value:String) {
+        self.currentTime = value
+    }
+    
+    /// 设置视频总时间
+    ///
+    /// - Parameter value: 时间值
+    func setTotalTime(value:String) {
+        self.totalTime = value
+    }
+    
+    /// 设置当前播放时间和视频总时长
+    ///
+    /// - Parameters:
+    ///   - curTime: 当前播放时间值
+    ///   - talTime: 视频总长时间值
+    func setTime(curTime:String, talTime:String) {
+        self.totalTime = talTime
+        self.currentTime = curTime
+    }
 }

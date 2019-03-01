@@ -52,6 +52,7 @@ class HeadToolbarView: UIView {
     /// - Parameter frame: 视图大小
     override init(frame: CGRect) {
         super.init(frame: frame)
+        self.layerImage(name: "h_toolbar")
         self.addSubclassElement()
     }
     required init?(coder aDecoder: NSCoder) {
@@ -76,7 +77,6 @@ extension HeadToolbarView {
 
     /// 子类视图布局
     override func layoutSubviews() {
-        print("sssss")
         let width = self.bounds.width
         let height = self.bounds.height > 40 ? self.bounds.height : 40
         let interval : CGFloat = 5.0
