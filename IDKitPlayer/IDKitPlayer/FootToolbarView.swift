@@ -18,6 +18,9 @@ import UIKit
     /// - Parameter btn: 按钮对象
     func fullScreenMethod(_ btn: UIButton)
     
+    /// 视频手动滑动轨道的代理
+    ///
+    /// - Parameter value: 轨道变更值
     func slidValueChangeMethod(_ value: Float)
     
 }
@@ -195,5 +198,13 @@ extension FootToolbarView {
     func setTime(curTime:String, talTime:String) {
         self.totalTime = talTime
         self.currentTime = curTime
+    }
+
+
+    /// 设置视频缓冲轨道的数值
+    ///
+    /// - Parameter value: 进度值
+    func setBufferProgressTrack(value:Float) {
+        self.trackView.setBufferProgress(value: value)
     }
 }

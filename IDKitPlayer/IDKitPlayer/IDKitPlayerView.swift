@@ -163,11 +163,25 @@ extension IDKitPlayerView {
         }
         
         if self.playItem!.isKind(of: AVPlayerItem.self) , keyPath == "loadedTimeRanges" {
-            print("缓冲区中.....")
+            let loadedTimeRanges = self.playItem!.loadedTimeRanges
+            let timeRange = loadedTimeRanges.first as! CMTimeRange
+            guard timeRange.isValid else {return}
+            let loadingTime = timeRange.start + timeRange.duration
+            let percentage = loadingTime.seconds / self.playItem!.duration.seconds
+            weak var weakself = self
+            DispatchQueue.main.async {
+                weakself?.setBufferProgressTrack(value: Float(percentage))
+            }
+            print("缓冲区中..... %f",percentage)
         }
         
         if self.playItem!.isKind(of: AVPlayerItem.self) , keyPath == "status" {
-            print("视频状态发生改变")
+            let status = change![.newKey] as! Int
+            if status == 1 {
+                print("准备播放")
+            }else{
+                print("暂停播放")
+            }
         }
 
     }
@@ -186,5 +200,17 @@ extension IDKitPlayerView {
     /// 底部当前轨道滑动触发事件
     func slidValueChangeMethod(_ value: Float) {
         print("改变视频播放位置")
+    }
+}
+
+
+// MARK: - 对外方法的扩展
+extension IDKitPlayerView {
+
+    /// 设置视频缓冲轨道的数值
+    ///
+    /// - Parameter value: 进度值
+    func setBufferProgressTrack(value:Float) {
+        self.footToolbarView.setBufferProgressTrack(value: value)
     }
 }
