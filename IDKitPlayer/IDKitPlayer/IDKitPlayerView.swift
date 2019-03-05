@@ -9,6 +9,23 @@
 import UIKit
 import AVKit
 
+
+/// 视频的播放状态
+///
+/// - noPlay: 视频从未播放
+/// - playing: 视频播放中
+/// - pause: 视频暂停
+/// - loadFail: 视频加载失败
+/// - playFail: 视频播放失败
+enum VideoPlayStatus {
+    case noPlay
+    case playing
+    case pause
+    case loadFail
+    case playFail
+}
+
+
 class IDKitPlayerView: UIView,FootToolbarViewDelegate {
 
     /// 头部工具栏
@@ -36,6 +53,7 @@ class IDKitPlayerView: UIView,FootToolbarViewDelegate {
     /// 加载动画视图
     lazy var loadAnimationView : LoadAnimationView = {
         let view = LoadAnimationView.init(frame:CGRect.init(x: 0, y: 0, width: self.bounds.width, height: self.bounds.height), type: .none)
+        view.isHidden = true
         return view
     }()
     
@@ -71,6 +89,15 @@ class IDKitPlayerView: UIView,FootToolbarViewDelegate {
     /// 视频地址
     var url : String?
     
+    /// 视频界面是否锁定
+    var lockStatus:Bool = false
+    
+    /// 视频的播放状态
+    var videoPlayStatus:VideoPlayStatus = .noPlay
+    
+    /// 视频播放时间的观察对象
+    var playTimeObserve : Any?
+    
     /// 类初始化方法
     ///
     /// - Parameter frame: 视图大小
@@ -91,9 +118,11 @@ extension IDKitPlayerView {
     /// 添加子类元素
     fileprivate func addSubclassElecment(){
         self.addSubview(self.coverImageView)
+        self.addSubview(self.footToolbarView)
+        self.addSubview(self.loadAnimationView)
         self.addSubview(self.headToolbarView)
         self.addSubview(self.playOrPauseButton)
-        self.addSubview(self.footToolbarView)
+       
         
     }
     
@@ -104,6 +133,9 @@ extension IDKitPlayerView {
         
         /// 视频封面视图
         self.coverImageView.frame = CGRect.init(x: 0, y: 0, width: self.bounds.width, height: self.bounds.height)
+        
+        /// 播放器的窗口大小设置
+        self.playerLayer.frame = self.coverImageView.frame;
         
         /// 头部工具栏
         self.headToolbarView.frame = CGRect.init(x: 0, y: 0, width: width, height: 40)
@@ -122,16 +154,20 @@ extension IDKitPlayerView {
     /// - Parameter btn: 按钮对象
     @objc func playOrPauseButtonAction(_ btn:UIButton) {
         self.playOrPauseButton.isSelected = !btn.isSelected
+        self.playOrPauseButton.isHidden = true
         self.preparePlay()
     }
     
     
     /// 视频准备播放
     fileprivate func preparePlay(){
+        self.loadAnimationView.startAnimation()
         guard self.url != nil, self.url?.count != 0 else {return}
         self.playItem = AVPlayerItem.init(url: URL.init(string: self.url!)!)
         self.player = AVPlayer.init(playerItem: self.playItem!)
         self.registerObserves()
+        self.playerLayer.player = self.player!
+        self.coverImageView.layer.addSublayer(self.playerLayer)
     }
     
     
@@ -149,8 +185,23 @@ extension IDKitPlayerView {
         
         // 视频状态的观察
         self.playItem?.addObserver(self, forKeyPath: "status", options: NSKeyValueObservingOptions.new, context: nil)
+        
+        
 
     }
+    
+    /// 注册视频播放时间的刷新频率
+    fileprivate func registerPalyTimeRefreshFate(){
+        if playTimeObserve == nil {
+            weak var weakself = self
+            playTimeObserve = self.player!.addPeriodicTimeObserver(forInterval: CMTime.init(value: CMTimeValue(1.0), timescale: 10), queue: DispatchQueue.main, using: { (cmTime) in
+                DispatchQueue.main.async {
+                    weakself!.setVideoPalyTime(value: cmTime.videoTime)
+                }
+            })
+        }
+    }
+    
     
     /// 观察者方法方法的处理函数
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -178,12 +229,28 @@ extension IDKitPlayerView {
         if self.playItem!.isKind(of: AVPlayerItem.self) , keyPath == "status" {
             let status = change![.newKey] as! Int
             if status == 1 {
+                self.player!.play()
+                videoPlayStatus = .playing
+                self.registerPalyTimeRefreshFate()
+                self.loadAnimationView.stopAnimation()
                 print("准备播放")
             }else{
+                videoPlayStatus = .pause
                 print("暂停播放")
             }
         }
-
+    }
+    
+    /// 设置视频播放时间
+    fileprivate func setVideoPalyTime(value:String ){
+        self.footToolbarView.setCurrentTime(value: value)
+    }
+    
+    
+    
+    /// 视频播放隐藏控件
+    fileprivate func hideVideoControls(){
+        
     }
 }
 

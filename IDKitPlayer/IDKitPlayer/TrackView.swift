@@ -23,7 +23,6 @@ class TrackView: UIView {
     /// 缓冲进度轨道
     fileprivate lazy var bufferProgressTrackView : UIProgressView = {
         let progressview = UIProgressView.init()
-        progressview.progress = 0.6
         progressview.progressTintColor = UIColor.init(white: 0.7, alpha: 1.0)
         progressview.trackTintColor = UIColor.clear
         return progressview

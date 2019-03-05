@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import CoreMedia
 
 // MARK: - 底部工具栏协议
 @objc protocol FootToolbarViewDelegate {
@@ -31,12 +31,12 @@ class FootToolbarView: UIView {
     weak var delegate:FootToolbarViewDelegate?
 
     /// 当前播放时间
-    var currentTime : String {
+    var currentTime : CMTime {
         get{
-            return self.currentTimeLable.text!
+            return self.currentTimeLable.text!.toCMTime
         }
         set{
-            self.currentTimeLable.text = newValue
+            self.currentTimeLable.text = newValue.videoTime
         }
     }
     
@@ -51,12 +51,12 @@ class FootToolbarView: UIView {
     }()
     
     /// 视频总的播放时间
-    var totalTime : String {
+    var totalTime : CMTime {
         get{
-            return self.totalTimeLable.text!
+            return self.totalTimeLable.text!.toCMTime
         }
         set{
-            self.totalTimeLable.text = newValue
+            self.totalTimeLable.text = newValue.videoTime
         }
     }
     
@@ -206,5 +206,12 @@ extension FootToolbarView {
     /// - Parameter value: 进度值
     func setBufferProgressTrack(value:Float) {
         self.trackView.setBufferProgress(value: value)
+    }
+    
+    /// 设置视频当前播放轨道的数值
+    ///
+    /// - Parameter value: 滑动值
+    func setPlaySlidTrack(value:Float) {
+        self.trackView.setPlaySlid(value: value)
     }
 }

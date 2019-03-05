@@ -68,6 +68,7 @@ extension LoadAnimationView {
     
     func startAnimation(){
         if self.animationType == .none {
+            self.isHidden = false
             self.activityIndicatorView.startAnimating()
         }
     }
@@ -75,6 +76,7 @@ extension LoadAnimationView {
     
     func stopAnimation() {
         if self.animationType == .none {
+            self.isHidden = true
             self.activityIndicatorView.stopAnimating()
         }
     }

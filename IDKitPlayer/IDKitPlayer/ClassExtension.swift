@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import CoreMedia
 
 
 
@@ -43,6 +44,48 @@ extension UIView {
     }
     
     
+}
+
+
+// MARK: - 时间转化扩展
+extension CMTime {
+    
+    /// CMTime 转化为视频格式时间
+    var videoTime:String {
+        guard self.isValid else {
+            return "00:00"
+        }
+        let value = self.seconds
+        let minutesPart = Int(value) / 60
+        let secondsPart = Int(value) % 60
+        return String.init(format: "%02d:%02d", minutesPart,secondsPart)
+    }
+    
+    /// CMTime 转化为 Float 类型数值
+    var floatValue:Float {
+        guard self.isValid else {
+            return 0
+        }
+        let value = self.seconds
+        return Float(value)
+    }
+}
+
+
+// MARK: - 字符串的扩展
+extension String {
+    
+    /// String 转 CMTime
+    var toCMTime: CMTime {
+        guard self.count != 0  else {
+            return CMTime.zero
+        }
+        let componentsArray = self.components(separatedBy: ":")
+        let minutesPart = componentsArray.first!
+        let secondPart = componentsArray.last!
+        let value = CMTimeValue(minutesPart)! * 60 + CMTimeValue(secondPart)!
+        return CMTime.init(value: value, timescale: 10)
+    }
 }
 
 
