@@ -159,9 +159,6 @@ extension FootToolbarView {
         self.delegate!.fullScreenMethod(btn)
     }
     
-    
-    
-    
 }
 
 
@@ -170,24 +167,25 @@ extension FootToolbarView {
     
     /// 底部按钮重置方法
     func reset(){
-        self.currentTime = ""
-        self.totalTime = ""
+        self.currentTime = "".toCMTime
+        self.totalTime = "".toCMTime
         self.trackView.reset()
     }
-    
     
     /// 设置当前播放时间
     ///
     /// - Parameter value: 时间值
-    func setCurrentTime(value:String) {
-        self.currentTime = value
+    func setCurrentTime(time:CMTime) {
+        self.currentTime = time
+        let rate = time.floatValue / self.totalTime.floatValue
+        self.setPlaySlidTrack(value: rate)
     }
     
     /// 设置视频总时间
     ///
     /// - Parameter value: 时间值
-    func setTotalTime(value:String) {
-        self.totalTime = value
+    func setTotalTime(time:CMTime) {
+        self.totalTime = time
     }
     
     /// 设置当前播放时间和视频总时长
@@ -195,11 +193,10 @@ extension FootToolbarView {
     /// - Parameters:
     ///   - curTime: 当前播放时间值
     ///   - talTime: 视频总长时间值
-    func setTime(curTime:String, talTime:String) {
+    func setTime(curTime:CMTime, talTime:CMTime) {
         self.totalTime = talTime
         self.currentTime = curTime
     }
-
 
     /// 设置视频缓冲轨道的数值
     ///

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0422A14E222F6F2800FC52D3 /* CoverImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0422A14D222F6F2800FC52D3 /* CoverImageView.swift */; };
 		048188A72227D7F900DB3E78 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048188A62227D7F900DB3E78 /* AppDelegate.swift */; };
 		048188A92227D7F900DB3E78 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048188A82227D7F900DB3E78 /* ViewController.swift */; };
 		048188AC2227D7F900DB3E78 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 048188AA2227D7F900DB3E78 /* Main.storyboard */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0422A14D222F6F2800FC52D3 /* CoverImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverImageView.swift; sourceTree = "<group>"; };
 		048188A32227D7F900DB3E78 /* IDKitPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IDKitPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		048188A62227D7F900DB3E78 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		048188A82227D7F900DB3E78 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				048188BD2227DB1700DB3E78 /* FootToolbarView.swift */,
 				048188BF2227DB3400DB3E78 /* TrackView.swift */,
 				04C9275A22290B1D0002E725 /* LoadAnimationView.swift */,
+				0422A14D222F6F2800FC52D3 /* CoverImageView.swift */,
 				04C927562228BE250002E725 /* ClassExtension.swift */,
 				04C927542228BD1B0002E725 /* Player.bundle */,
 			);
@@ -169,6 +172,7 @@
 				048188A92227D7F900DB3E78 /* ViewController.swift in Sources */,
 				048188BA2227D9CC00DB3E78 /* IDKitPlayerView.swift in Sources */,
 				048188A72227D7F900DB3E78 /* AppDelegate.swift in Sources */,
+				0422A14E222F6F2800FC52D3 /* CoverImageView.swift in Sources */,
 				048188C02227DB3400DB3E78 /* TrackView.swift in Sources */,
 				04C9275B22290B1D0002E725 /* LoadAnimationView.swift in Sources */,
 				04C927572228BE250002E725 /* ClassExtension.swift in Sources */,
@@ -321,6 +325,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5MVTKYAXC9;
 				INFOPLIST_FILE = IDKitPlayer/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -339,6 +344,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5MVTKYAXC9;
 				INFOPLIST_FILE = IDKitPlayer/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

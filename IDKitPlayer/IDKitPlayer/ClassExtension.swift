@@ -84,10 +84,19 @@ extension String {
         let minutesPart = componentsArray.first!
         let secondPart = componentsArray.last!
         let value = CMTimeValue(minutesPart)! * 60 + CMTimeValue(secondPart)!
-        return CMTime.init(value: value, timescale: 10)
+        return CMTime.init(value: value, timescale: CMTimeScale(1.0))
     }
 }
 
+
+// MARK: - Float 类型扩展
+extension Float {
+    
+    /// Float 转 CMTime
+    var toCMTime : CMTime {
+        return CMTime.init(value: CMTimeValue(self), timescale: 1)
+    }
+}
 
 
 

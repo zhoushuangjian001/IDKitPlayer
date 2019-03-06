@@ -15,6 +15,7 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         let view = IDKitPlayerView.init(frame: CGRect.init(x: 0, y: 100, width: self.view.bounds.width, height: 300))
         view.url = "https://media.w3.org/2010/05/sintel/trailer.mp4"
+        view.coverImage = UIImage.init(named: "test.jpg")
         self.view.addSubview(view)
     }
 

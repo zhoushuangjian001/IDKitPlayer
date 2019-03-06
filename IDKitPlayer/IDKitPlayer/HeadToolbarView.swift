@@ -45,7 +45,7 @@ class HeadToolbarView: UIView {
         button.isHidden = true
         return button
     }()
-
+    
 
     /// 类初始化
     ///
