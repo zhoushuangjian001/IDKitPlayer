@@ -74,6 +74,7 @@ class FootToolbarView: UIView {
     fileprivate lazy var fullScreenButton : UIButton = {
         let button = UIButton.init(type: .custom)
         button.setImage(UIImage.initBundle(name: "fsbtn"), for: .normal)
+        button.setImage(UIImage.initBundle(name: "closefb"), for: .selected)
         button.addTarget(self, action: #selector(fullScreenAction(_ :)), for: .touchUpInside)
         return button
     }()
@@ -84,6 +85,18 @@ class FootToolbarView: UIView {
         view.backgroundColor = UIColor.clear
         return view
     }()
+    
+    /// 是否是全屏状态
+    fileprivate var status : Bool = false
+    var fullScreenStatus: Bool {
+        get{return status}
+        set{
+            self.status = newValue
+            DispatchQueue.main.async {
+                self.fullScreenButton.isSelected = newValue
+            }
+        }
+    }
     
     /// 重写类初始化方法
     ///
@@ -129,6 +142,7 @@ extension FootToolbarView {
         // 设置默认数值
         let lableWidth : CGFloat = 60.0
         let subElementHeight : CGFloat = 30.0
+        let safeOffset:CGFloat = (UIScreen.main.bounds.height >  800 && self.status) == true ? 20: 0
         let interval : CGFloat = 5.0
         let width = self.bounds.width
         let height = self.bounds.height > subElementHeight ? self.bounds.height : 40.0
@@ -140,7 +154,7 @@ extension FootToolbarView {
         
         // 轨道视图
         origin_x = interval + self.currentTimeLable.frame.maxX
-        self.trackView.frame = CGRect.init(x: origin_x, y: origin_y, width: width - 205, height: subElementHeight)
+        self.trackView.frame = CGRect.init(x: origin_x, y: origin_y, width: width - 205 - safeOffset, height: subElementHeight)
         
         // 总时间
         origin_x = interval + self.trackView.frame.maxX
@@ -210,5 +224,12 @@ extension FootToolbarView {
     /// - Parameter value: 滑动值
     func setPlaySlidTrack(value:Float) {
         self.trackView.setPlaySlid(value: value)
+    }
+    
+    /// 设置视频全屏按钮的状态
+    ///
+    /// - Parameter status: 状态值
+    func setFullScreen(status:Bool){
+        self.fullScreenButton.isSelected = status
     }
 }

@@ -16,6 +16,7 @@ import AVKit
 /// - playing: 视频播放中
 /// - pause: 视频暂停
 /// - playEnd: 视频播放完毕
+/// - replay: 视频重新播放
 /// - loadFail: 视频加载失败
 /// - playFail: 视频播放失败
 enum VideoPlayStatus {
@@ -23,16 +24,18 @@ enum VideoPlayStatus {
     case playing
     case pause
     case playEnd
+    case replay
     case loadFail
     case playFail
 }
 
 
-class IDKitPlayerView: UIView,FootToolbarViewDelegate {
+class IDKitPlayerView: UIView,HeadToolbarViewDelegate,FootToolbarViewDelegate {
 
     /// 头部工具栏
     lazy var headToolbarView : HeadToolbarView = {
         let view = HeadToolbarView.init()
+        view.delegate = self
         view.isHidden = true
         return view
     }()
@@ -48,8 +51,7 @@ class IDKitPlayerView: UIView,FootToolbarViewDelegate {
     /// 播放和暂停按钮
     lazy var playOrPauseButton : UIButton = {
         let button = UIButton.init(type: UIButton.ButtonType.custom)
-        button.setImage(UIImage.initBundle(name: "pause"), for: .normal)
-        button.setImage(UIImage.initBundle(name: "play"), for: .selected)
+        button.setImage(UIImage.initBundle(name: "play"), for: .normal)
         button.addTarget(self, action: #selector(playOrPauseButtonAction(_ :)), for: .touchUpInside)
         return button
     }()
@@ -119,9 +121,19 @@ class IDKitPlayerView: UIView,FootToolbarViewDelegate {
         return window
     }()
     
+    /// 视图的父视图（用于视频还原）
+    fileprivate var parentView: Any?
     
-    /// 是否全屏
-    fileprivate var isFullScreen: Bool = false
+    /// 视图初始大小（用于视频还原）
+    fileprivate var initialFrame:CGRect = .zero
+    
+    
+    /// 视频标题设置
+    var title : String = "" {
+        willSet{
+            self.headToolbarView.title = newValue
+        }
+    }
     
     /// 类初始化方法
     ///
@@ -154,10 +166,10 @@ extension IDKitPlayerView {
     
     /// 子类视图布局
     override func layoutSubviews() {
+        
+        /// 设置父视图的宽高
         let width = self.bounds.width
         let height = self.bounds.height
-        
-        print(width ,height)
         
         /// 视频封面视图
         self.coverImageView.frame = CGRect.init(x: 0, y: 0, width: width, height: height)
@@ -165,22 +177,12 @@ extension IDKitPlayerView {
         /// 播放器的窗口大小设置
         self.playerLayer.frame = self.coverImageView.frame;
         
-        /// 全屏变更布局
-        if isFullScreen {
-            /// 头部工具栏
-            self.headToolbarView.frame = CGRect.init(x: 0, y: 0, width: width, height: 40)
-            
-            // 底部工具栏
-            self.footToolbarView.frame = CGRect.init(x: 0, y: height - 40, width: width, height: 40)
-        }else{
-            /// 头部工具栏
-            self.headToolbarView.frame = CGRect.init(x: 0, y: -40, width: width, height: 40)
-            
-            // 底部工具栏
-            self.footToolbarView.frame = CGRect.init(x: 0, y: height, width: width, height: 40)
-        }
+        /// 头部工具栏
+        self.headToolbarView.frame = CGRect.init(x: 0, y: 0, width: width, height: 40)
         
-        
+        // 底部工具栏
+        self.footToolbarView.frame = CGRect.init(x: 0, y: height - 40, width: width, height: 40)
+
         // 播放和暂停按钮
         self.playOrPauseButton.frame = CGRect.init(x: width * 0.5 - 22.5, y: height * 0.5 - 22.5, width: 45, height: 45)
         
@@ -189,26 +191,26 @@ extension IDKitPlayerView {
     }
     
     
-    
-    
     /// 播放和暂停按钮事件
     ///
     /// - Parameter btn: 按钮对象
     @objc func playOrPauseButtonAction(_ btn:UIButton) {
-        self.playOrPauseButton.isSelected = !btn.isSelected
-        // 判断视频的状态
-        if videoPlayStatus == .noPlay {
+        if videoPlayStatus == .noPlay || videoPlayStatus == .playEnd {
             self.playOrPauseButton.isHidden = true
+            self.playOrPauseButton.setImage(UIImage.initBundle(name: "playing"), for: .normal)
             self.preparePlay()
         }else if videoPlayStatus == .playing {
-            videoPlayStatus = .pause
+            self.playOrPauseButton.setImage(UIImage.initBundle(name: "pause"), for: .normal)
             self.player!.pause()
+            videoPlayStatus = .pause
         }else if videoPlayStatus == .pause {
-            videoPlayStatus = .playing
+            self.playOrPauseButton.setImage(UIImage.initBundle(name: "playing"), for: .normal)
             self.player!.play()
+            videoPlayStatus = .playing
         }
     }
     
+
     
     /// 视频准备播放
     fileprivate func preparePlay(){
@@ -266,6 +268,7 @@ extension IDKitPlayerView {
             print("缓冲区可以播放")
         }
         
+        // 视频缓冲进度
         if self.playItem!.isKind(of: AVPlayerItem.self) , keyPath == "loadedTimeRanges" {
             let loadedTimeRanges = self.playItem!.loadedTimeRanges
             let timeRange = loadedTimeRanges.first as! CMTimeRange
@@ -278,6 +281,7 @@ extension IDKitPlayerView {
             }
         }
         
+        // 视频的状态
         if self.playItem!.isKind(of: AVPlayerItem.self) , keyPath == "status" {
             let status = change![.newKey] as! Int
             if status == 1 {
@@ -285,7 +289,7 @@ extension IDKitPlayerView {
                 self.videoPlayStatus = .playing
                 self.registerPalyTimeRefreshFate()
                 self.loadAnimationView.stopAnimation()
-                print("准备播放")
+                self.initalizePlayerControls()
             }else{
                 self.videoPlayStatus = .pause
                 print("暂停播放")
@@ -293,26 +297,33 @@ extension IDKitPlayerView {
         }
     }
     
+    
     /// 设置视频播放时间
+    ///
+    /// - Parameter time: 时间值
     fileprivate func setVideoPalyTime(time:CMTime ){
         self.footToolbarView.setCurrentTime(time:time)
     }
     
+    
     /// 设置视频的总时间
+    ///
+    /// - Parameter time: 时间值
     fileprivate func setVideoTotalTime(time:CMTime) {
         self.footToolbarView.setTotalTime(time: time)
     }
     
     
+    
     /// 视频播放完毕回调
+    ///
+    /// - Parameter notification: 通知对象
     @objc fileprivate func videoPlayEnd(_ notification: Notification){
         self.videoPlayStatus = .playEnd
         self.playerLayer.removeFromSuperlayer()
         self.removeObservers()
         self.playEndControls()
     }
-    
- 
     
     /// 移除所有观察
     fileprivate func removeObservers(){
@@ -336,7 +347,7 @@ extension IDKitPlayerView {
                         
                     }else{
                         // TODO:- 展示头部和底部工具栏和锁屏按钮
-                        weakself!.showPalyClontrls(status: !self.footToolbarView.isHidden, tager: self)
+                        weakself!.palyerControls(status: !self.footToolbarView.isHidden, target: self)
                     }
                 }
             }
@@ -348,8 +359,15 @@ extension IDKitPlayerView {
     /// - Parameter btn: 按钮对象
     @objc func lockPlayInterfaceMethod(_ btn:UIButton) {
         self.lockPlayInterfaceButton.isSelected = !btn.isSelected
-        self.showPalyClontrls(status: self.lockPlayInterfaceButton.isSelected, tager: btn)
+        self.palyerControls(status: self.lockPlayInterfaceButton.isSelected, target: btn)
         self.coverImageView.isUserInteractionEnabled = !self.lockPlayInterfaceButton.isSelected
+    }
+    
+    /// 设置视频缓冲轨道的数值
+    ///
+    /// - Parameter value: 进度值
+    fileprivate func setBufferProgressTrack(value:Float) {
+        self.footToolbarView.setBufferProgressTrack(value: value)
     }
 }
 
@@ -360,39 +378,28 @@ extension IDKitPlayerView {
     
     /// 全屏按钮触发事件
     func fullScreenMethod(_ btn: UIButton) {
+        // 判断按钮是否被选中
         if !btn.isSelected {
-            isFullScreen = true
-            // 进入全屏
-            self.window!.addSubview(self)
-            UIView.animate(withDuration: 0.25) {
-                self.transform = CGAffineTransform.init(rotationAngle: -.pi/2)
-            }
-            self.frame = CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+            self.videoEnterFullScreenMethod()
         }else{
-            // 退出全屏
+            self.videoExitFullScreenMethod()
         }
+        btn.isSelected = !btn.isSelected
     }
     
     /// 底部当前轨道滑动触发事件
     func slidValueChangeMethod(_ value: Float) {
+        // 获取当前滑动时间点
         let playTime = value * self.playItem!.duration.floatValue
         self.playItem!.seek(to: playTime.toCMTime) { (isFinish) in
              print("拖动--",isFinish)
         }
     }
     
-    
-}
-
-
-// MARK: - 对外方法的扩展
-extension IDKitPlayerView {
-
-    /// 设置视频缓冲轨道的数值
-    ///
-    /// - Parameter value: 进度值
-    func setBufferProgressTrack(value:Float) {
-        self.footToolbarView.setBufferProgressTrack(value: value)
+    /// 导航返回按钮触发代理
+    func navigationBackButtonMethod() {
+        // 退出全屏
+        self.videoExitFullScreenMethod()
     }
 }
 
@@ -403,8 +410,8 @@ extension IDKitPlayerView {
     /// 显示或者隐藏视频控件
     ///
     /// - Parameter status: 是否显示状态值
-    fileprivate func showPalyClontrls(status:Bool , tager:NSObject) {
-        if tager != self.lockPlayInterfaceButton {
+    fileprivate func palyerControls(status:Bool , target:Any) {
+        if (target as? UIButton) != self.lockPlayInterfaceButton {
             self.lockPlayInterfaceButton.isHidden = status
         }
         self.playOrPauseButton.isHidden = status
@@ -420,30 +427,62 @@ extension IDKitPlayerView {
     }
     
     
-    /// 播放完毕控件的控制
+    /// 播放完毕控件的状态
     fileprivate func playEndControls(){
         self.playTimeObserve = nil
-        self.playOrPauseButton.isSelected = false
+        self.playOrPauseButton.setImage(UIImage.initBundle(name: "play"), for: .normal)
         self.playOrPauseButton.isHidden = false
         self.lockPlayInterfaceButton.isSelected = false
         self.coverImageView.isUserInteractionEnabled = true
         self.lockPlayInterfaceButton.isHidden = true
         self.footToolbarView.reset()
         // 判断是否显示状态
-        if !self.footToolbarView.isHidden {
-            self.headToolbarView.isHidden = true
-            self.footToolbarView.isHidden = true
+        if self.footToolbarView.isHidden {
             UIView.animate(withDuration: 1.0) {
-                self.headToolbarView.alpha = 0
-                self.footToolbarView.alpha = 0
-                let offset_y:CGFloat = -40
+                let offset_y:CGFloat = 40
                 self.headToolbarView.center = CGPoint.init(x: self.headToolbarView.center.x, y: self.headToolbarView.center.y + offset_y)
                 self.footToolbarView.center = CGPoint.init(x: self.footToolbarView.center.x, y: self.footToolbarView.center.y - offset_y)
             }
         }
+        self.headToolbarView.isHidden = true
+        self.footToolbarView.isHidden = true
     }
     
     
+    /// 视频播放前控件的初始化设置
+    fileprivate func initalizePlayerControls(){
+        self.lockPlayInterfaceButton.isHidden = false
+        self.playOrPauseButton.isHidden = false
+        self.headToolbarView.isHidden = false
+        self.footToolbarView.isHidden = false
+    }
     
+    /// 视频进入全屏
+    fileprivate func videoEnterFullScreenMethod(){
+        
+        // 记录初始视图大小
+        initialFrame = self.frame
+        parentView = self.superview
+        self.headToolbarView.fullScreenStatus = true
+        self.footToolbarView.fullScreenStatus = true
+        UIView.animate(withDuration: 0.25) {
+            self.transform = CGAffineTransform.init(rotationAngle: -.pi/2)
+        }
+        self.frame = CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+        self.window!.addSubview(self)
+    }
     
+    /// 视频退出全屏函数
+    fileprivate func videoExitFullScreenMethod(){
+        
+        // 用于安全显示（刘海型手机）
+        self.headToolbarView.fullScreenStatus = false
+        self.footToolbarView.fullScreenStatus = false
+        UIView.animate(withDuration: 0.25) {
+            self.transform = CGAffineTransform.init(rotationAngle: .pi*2)
+        }
+        self.frame = initialFrame
+        // 视图还原到父视图上
+        (parentView! as AnyObject).addSubview(self)
+    }
 }
